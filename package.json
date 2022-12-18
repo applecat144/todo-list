@@ -1,0 +1,29 @@
+{
+  "name": "dummy-website-starter",
+  "version": "1.0.0",
+  "description": "This contains the basic html, css and js files aswell as the base html setup to link everything together. Handy !",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "watch": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/applecat144/dummy-website-starter.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/applecat144/dummy-website-starter/issues"
+  },
+  "homepage": "https://github.com/applecat144/dummy-website-starter#readme",
+  "devDependencies": {
+    "css-loader": "^6.7.3",
+    "html-webpack-plugin": "^5.5.0",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

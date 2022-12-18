@@ -11,6 +11,7 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Untitled for now',
+            template: './src/index.html',
         }),
     ],
     module: {
@@ -30,5 +31,4 @@ module.exports = {
         ],
     },
     mode: 'development',
-    devtool: 'inline-source-map',
 }

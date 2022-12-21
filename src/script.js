@@ -78,50 +78,47 @@ const taskManager = (function () {
         taskList.push(addTask);
     }
 
-    const assignToProject = function (parentProject, assignTo) {
+    const taskLookup = function(name) {
+        
+        // parse taskList and return the index of the named task, if it exists. Else returns -1
 
-        let projectList = projectManager.getProjectList();
-
-        for (let i = 0; i < projectList.length; i++) {
-
-            if (projectList[i].name !== parentProject) {
-                if ((i + 1) === projectList.length) {
-                    console.log(`${parentProject} doesn't exist, terminating assignToProject`);
-                    return 0;
+        for (let i = 0; i < taskList.length; i++) {
+            if (taskList[i].name !== name) {
+                if((i+1) === taskList.length) {
+                    console.log(`${name} doesn't exist. Terminating.`);
+                    return -1;
                 }
                 continue;
             } else {
-                console.log(`${parentProject} does exist, assignToProject proceeds`);
-
-                for (let j = 0; j < taskList.length; j++) {
-
-                    if (taskList[j].name !== assignTo) {
-                        if ((j + 1) === taskList.length) {
-                            console.log(`${assignTo} doesn't exist, terminating assignToProject`);
-                            return 0;
-                        }
-                        continue;
-                    } else {
-
-                        if(taskList[j].projects.filter((value) => value === parentProject).length) {
-                            console.log(`${assignTo} is already assigned to ${parentProject}. Aborting assignToProject`);
-                            return 0;
-                        }
-                        taskList[j].addProject(parentProject);
-                        console.log(`${assignTo} assigned to ${parentProject} successfully`);
-                        projectManager.assignTask(assignTo, parentProject);
-                        return 1;
-                    }
-                }
+                return i;
             }
         }
+    }
+
+    const assignProjectToTask = function(projectName, taskName) {
+
+        // assign a project to a task if both exist and aren't already paired, else return -1
+
+        if (projectManager.projectLookup(projectName) === -1) {
+            return -1;
+        };
+        let taskIndex = taskLookup(taskName);
+
+        if(taskList[taskIndex].projects.filter((value) => value === projectName).length) {
+            console.log(`${taskName} is already assigned to ${projectName}. Terminating`);
+            return -1;
+        }
+        
+        taskList[taskIndex].addProject(projectName);
+        projectManager.assignTaskToProject(projectName, taskName);
     }
 
     return {
         getTaskList,
         getTask,
         newTask,
-        assignToProject,
+        taskLookup,
+        assignProjectToTask,
     };
 })();
 
@@ -142,60 +139,50 @@ const projectManager = (function () {
         projectList.push(add);
     }
 
-    const assignTask = function (taskToAssign, assignTo) {
+    const projectLookup = function(name) {
+        
+        // parse projectList and return the index of the named project, if it exists. Else returns -1
 
-        let taskList = taskManager.getTaskList();
-
-        for (let i = 0; i < taskList.length; i++) {
-
-            if (taskList[i].name !== taskToAssign) {
-                if ((i + 1) === taskList.length) {
-                    console.log(`${taskToAssign} doesn't exist, terminating assignTask`);
-                    return 0;
+        for (let i = 0; i < projectList.length; i++) {
+            if (projectList[i].name !== name) {
+                if((i+1) === projectList.length) {
+                    console.log(`${name} doesn't exist. Terminating.`);
+                    return -1;
                 }
                 continue;
             } else {
-                console.log(`${taskToAssign} does exist, assignTask proceeds`);
-
-                for (let j = 0; j < projectList.length; j++) {
-                    
-                    if (projectList[j].name !== assignTo) {
-                        if ((j + 1) === taskList.length) {
-                            console.log(`${assignTo} doesn't exist, terminating assignTask`);
-                            return 0;
-                        }
-                        continue;
-                    } else {
-
-                        if(projectList[j].tasks.filter((value) => value === taskToAssign).length) {
-                            console.log(`${taskToAssign} already assigned to ${assignTo}. Aborting assignTask.`);
-                            return 0;
-                        }
-                        projectList[j].addTask(taskToAssign);
-                        console.log(`${taskToAssign} assigned to ${assignTo} successfully`);
-                        taskManager.assignToProject(assignTo, taskToAssign);
-                        return 1;
-                    }
-                }
+                return i;
             }
         }
+    }
+
+    const assignTaskToProject = function(projectName, taskName) {
+
+        // assign a task to a project if both exist and aren't already paired, else return -1
+
+        if(taskManager.taskLookup(taskName) === -1) {
+            return -1;
+        }
+        let projectIndex = projectLookup(projectName);
+
+        if(projectIndex === -1) {
+            return -1;
+        }
+
+        if(projectList[projectIndex].tasks.filter((value) => value === taskName).length) {
+            console.log(`${taskName} is already assigned to ${projectName}. Terminating.`);
+            return -1;
+        }
+
+        projectList[projectIndex].addTask(taskName);
+        taskManager.assignProjectToTask(projectName, taskName);
     }
 
     return {
         getProjectList,
         getProject,
         newProject,
-        assignTask
+        projectLookup,
+        assignTaskToProject,
     };
 })();
-
-
-taskManager.newTask('this', 'that', '12/31/2022');
-
-
-
-projectManager.newProject('a', 'b', '03/31/2022');
-taskManager.assignToProject('a', 'this');
-
-console.log(projectManager.getProject(0));
-console.log(taskManager.getTask(0));

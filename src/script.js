@@ -1,5 +1,5 @@
 import './style.css';
-import { format } from 'date-fns';
+import differenceInCalendarDays from 'date-fns/differenceInCalendarDays';
 
 class items {
     constructor(name, description, selectedDate) {
@@ -18,11 +18,11 @@ class items {
     }
 
     setCreationDate() {
-        this.creationDate = format(new Date(), 'dd/MM/yyyy');
+        this.creationDate = new Date();
     }
 
     setDueDate(selectedDate) {
-        this.dueDate = format(new Date(selectedDate), 'dd/MM/yyyy');
+        this.dueDate = new Date(selectedDate);
     }
 }
 
@@ -31,6 +31,7 @@ class task extends items {
         super(name, description, selectedDate);
         this.isPeriodic();
         this.projectList();
+        this.isCompleted();
     }
 
     isPeriodic() {
@@ -39,6 +40,10 @@ class task extends items {
 
     projectList() {
         this.projects = [];
+    }
+
+    isCompleted() {
+        this.complete = 0;
     }
 
     addProject(x) {
@@ -55,7 +60,7 @@ class project extends items {
     taskList() {
         this.tasks = [];
     }
-    
+
     addTask(x) {
         this.tasks.push(x);
     }
@@ -73,18 +78,32 @@ const taskManager = (function () {
     }
 
     const newTask = function (name, description, selectedDate) {
+
+        if (taskLookup(name) !== -1) {
+            console.log(`There's already a task named ${name}. Please pick a new name`);
+            return;
+        }
+
         let addTask = new task(name, description, selectedDate);
+
+        console.log(`${name} successfully created.`)
 
         taskList.push(addTask);
     }
 
-    const taskLookup = function(name) {
-        
+    const taskLookup = function (name) {
+
         // parse taskList and return the index of the named task, if it exists. Else returns -1
 
+        if (taskList.length === 0) {
+            console.log('no tasks stored yet');
+            return -1;
+        }
+
         for (let i = 0; i < taskList.length; i++) {
+
             if (taskList[i].name !== name) {
-                if((i+1) === taskList.length) {
+                if ((i + 1) === taskList.length) {
                     console.log(`${name} doesn't exist. Terminating.`);
                     return -1;
                 }
@@ -95,7 +114,32 @@ const taskManager = (function () {
         }
     }
 
-    const assignProjectToTask = function(projectName, taskName) {
+    const toggleComplete = function (x) {
+        if (taskList[x].complete) {
+            taskList[x].complete = 0;
+        } else {
+            taskList[x].complete = 1;
+        }
+    }
+
+    const getTimeLeft = function (x) {
+        let currDate = new Date();
+        let dueDate = taskList[x].dueDate;
+
+        if (Date.parse(currDate) >= (Date.parse(dueDate) + 86400000)) {
+            console.log(`time's up`);
+            return;
+        }
+
+        if (currDate.getFullYear() === dueDate.getFullYear() && currDate.getMonth() === dueDate.getMonth() && currDate.getDate() === dueDate.getDate()) {
+            console.log('last day to complete ! Hurry up !');
+            return;
+        }
+
+        console.log(`You have ${differenceInCalendarDays(dueDate, currDate)} day(s) to complete this task ! You can do it !`);
+    }
+
+    const assignProjectToTask = function (projectName, taskName) {
 
         // assign a project to a task if both exist and aren't already paired, else return -1
 
@@ -104,11 +148,11 @@ const taskManager = (function () {
         };
         let taskIndex = taskLookup(taskName);
 
-        if(taskList[taskIndex].projects.filter((value) => value === projectName).length) {
+        if (taskList[taskIndex].projects.filter((value) => value === projectName).length) {
             console.log(`${taskName} is already assigned to ${projectName}. Terminating`);
             return -1;
         }
-        
+
         taskList[taskIndex].addProject(projectName);
         projectManager.assignTaskToProject(projectName, taskName);
     }
@@ -118,6 +162,8 @@ const taskManager = (function () {
         getTask,
         newTask,
         taskLookup,
+        toggleComplete,
+        getTimeLeft,
         assignProjectToTask,
     };
 })();
@@ -134,18 +180,27 @@ const projectManager = (function () {
     }
 
     const newProject = function (name, description, selectedDate) {
+
+        if (projectLookup(name) !== -1) {
+            console.log(`There's already a project named ${name}. Please pick a new name.`);
+        }
         let add = new project(name, description, selectedDate);
 
         projectList.push(add);
     }
 
-    const projectLookup = function(name) {
-        
+    const projectLookup = function (name) {
+
         // parse projectList and return the index of the named project, if it exists. Else returns -1
+
+        if (projectList.length === 0) {
+            console.log('no tasks stored yet');
+            return -1;
+        }
 
         for (let i = 0; i < projectList.length; i++) {
             if (projectList[i].name !== name) {
-                if((i+1) === projectList.length) {
+                if ((i + 1) === projectList.length) {
                     console.log(`${name} doesn't exist. Terminating.`);
                     return -1;
                 }
@@ -156,20 +211,20 @@ const projectManager = (function () {
         }
     }
 
-    const assignTaskToProject = function(projectName, taskName) {
+    const assignTaskToProject = function (projectName, taskName) {
 
         // assign a task to a project if both exist and aren't already paired, else return -1
 
-        if(taskManager.taskLookup(taskName) === -1) {
+        if (taskManager.taskLookup(taskName) === -1) {
             return -1;
         }
         let projectIndex = projectLookup(projectName);
 
-        if(projectIndex === -1) {
+        if (projectIndex === -1) {
             return -1;
         }
 
-        if(projectList[projectIndex].tasks.filter((value) => value === taskName).length) {
+        if (projectList[projectIndex].tasks.filter((value) => value === taskName).length) {
             console.log(`${taskName} is already assigned to ${projectName}. Terminating.`);
             return -1;
         }
@@ -186,3 +241,7 @@ const projectManager = (function () {
         assignTaskToProject,
     };
 })();
+
+taskManager.newTask('this', 'that', '12-21-2023');
+taskManager.taskLookup('this');
+taskManager.getTimeLeft(taskManager.taskLookup('this'));

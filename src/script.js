@@ -1,5 +1,9 @@
 import './style.css';
 import differenceInCalendarDays from 'date-fns/differenceInCalendarDays';
+import { hoursToMilliseconds } from 'date-fns';
+
+window.foo = (function() {
+
 
 class items {
     constructor(name, description, selectedDate) {
@@ -24,6 +28,24 @@ class items {
     setDueDate(selectedDate) {
         this.dueDate = new Date(selectedDate);
     }
+
+    getTimeLeft() {
+        let currDate = new Date();
+        let dueDate = this.dueDate;
+
+        if (Date.parse(currDate) >= (Date.parse(dueDate) + 86400000)) {
+            console.log(`time's up`);
+            return -1;
+        }
+
+        if (currDate.getFullYear() === dueDate.getFullYear() && currDate.getMonth() === dueDate.getMonth() && currDate.getDate() === dueDate.getDate()) {
+            console.log('last day to complete ! Hurry up !');
+            return differenceInCalendarDays(dueDate, currDate);
+        }
+
+        console.log(`You have ${differenceInCalendarDays(dueDate, currDate)} day(s) to complete this task ! You can do it !`);
+        return differenceInCalendarDays(dueDate, currDate);
+    }
 }
 
 class task extends items {
@@ -46,6 +68,14 @@ class task extends items {
         this.complete = 0;
     }
 
+    toggleComplete() {
+        if (this.complete === 0) {
+            this.complete = 1;
+        } else {
+            this.complete = 0;
+        }
+    }
+
     addProject(x) {
         this.projects.push(x);
     }
@@ -66,6 +96,21 @@ class project extends items {
     }
 }
 
+const timeManager = (function () {
+
+    let date = new Date();
+
+    const clock = function () {
+        date = new Date();
+
+        return date;
+    }
+
+    return {
+        clock
+    }
+})();
+
 const taskManager = (function () {
     let taskList = [];
 
@@ -75,6 +120,10 @@ const taskManager = (function () {
 
     const getTask = function (x) {
         return taskList[x];
+    }
+
+    const getTaskByName = function (name) {
+        return getTask(taskLookup(name));
     }
 
     const newTask = function (name, description, selectedDate) {
@@ -89,6 +138,63 @@ const taskManager = (function () {
         console.log(`${name} successfully created.`)
 
         taskList.push(addTask);
+    }
+
+    const removeTask = function (x) {
+        taskList.splice(x, 1);
+
+        projectManager.clearTaskFromAll(taskList[x].name);
+    }
+
+    const removeCompleted = function () {
+        for (let i = 0; i < taskList.length; i++) {
+            if (taskList[i].complete === 1) {
+                taskList.splice(i, 1);
+            }
+        }
+    }
+
+    const sortAlphaUp = function () {
+        taskList.sort(function (a, b) {
+            if (a.name > b.name) {
+                return +1;
+            } else if (a.name < b.name) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+    }
+
+    const sortAlphaDown = function () {
+        taskList.sort(function (a, b) {
+            if (a.name > b.name) {
+                return -1;
+            } else if (a.name < b.name) {
+                return +1;
+            } else {
+                return 0;
+            }
+        })
+    }
+
+    const sortAscDueDate = function () {
+        taskList.sort(function (a, b) {
+            return Date.parse(a.dueDate) - Date.parse(b.dueDate);
+        })
+    }
+
+    const sortDescDueDate = function () {
+        taskList.sort(function (a, b) {
+            return Date.parse(b.dueDate) - Date.parse(a.dueDate);
+        })
+        console.log('?');
+    }
+
+    const sortCompletion = function () {
+        taskList.sort(function (a, b) {
+            return a.complete - b.complete;
+        })
     }
 
     const taskLookup = function (name) {
@@ -114,31 +220,6 @@ const taskManager = (function () {
         }
     }
 
-    const toggleComplete = function (x) {
-        if (taskList[x].complete) {
-            taskList[x].complete = 0;
-        } else {
-            taskList[x].complete = 1;
-        }
-    }
-
-    const getTimeLeft = function (x) {
-        let currDate = new Date();
-        let dueDate = taskList[x].dueDate;
-
-        if (Date.parse(currDate) >= (Date.parse(dueDate) + 86400000)) {
-            console.log(`time's up`);
-            return;
-        }
-
-        if (currDate.getFullYear() === dueDate.getFullYear() && currDate.getMonth() === dueDate.getMonth() && currDate.getDate() === dueDate.getDate()) {
-            console.log('last day to complete ! Hurry up !');
-            return;
-        }
-
-        console.log(`You have ${differenceInCalendarDays(dueDate, currDate)} day(s) to complete this task ! You can do it !`);
-    }
-
     const assignProjectToTask = function (projectName, taskName) {
 
         // assign a project to a task if both exist and aren't already paired, else return -1
@@ -157,26 +238,61 @@ const taskManager = (function () {
         projectManager.assignTaskToProject(projectName, taskName);
     }
 
+    const rmProjectFromTask = function (projectName, taskName) {
+        let rmIndex = taskLookup(taskName);
+
+        if(rmIndex === -1) {
+            console.log(`${taskName} doesn't exist.`);
+        }
+
+        if(!taskList[rmIndex].projects.filter((item) => item === projectName)) {
+            return -1;
+        } else {
+            for(let i = 0; i < taskList[rmIndex].projects.length; i++) {
+                if(taskList[rmIndex].projects[i] !== projectName) {
+                    continue;
+                }
+
+                taskList[rmIndex].projects.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    const clearProjectFromAll = function(projectName) {
+
+        console.log(projectName);
+        taskList.forEach((taskk) => {
+            rmProjectFromTask(projectName, taskk.name);
+        })
+    }
+
     return {
         getTaskList,
         getTask,
+        getTaskByName,
         newTask,
+        removeTask,
+        removeCompleted,
+        sortAlphaUp,
+        sortAlphaDown,
+        sortAscDueDate,
+        sortDescDueDate,
+        sortCompletion,
         taskLookup,
-        toggleComplete,
-        getTimeLeft,
         assignProjectToTask,
+        rmProjectFromTask,
+        clearProjectFromAll,
     };
 })();
 
 const projectManager = (function () {
     let projectList = [];
 
-    const getProjectList = function () {
-        return projectList;
-    }
+    const removeProject = function (x) {
+        projectList.splice(x, 1);
 
-    const getProject = function (x) {
-        return projectList[x];
+        taskManager.clearProjectFromAll(projectList[x].name);
     }
 
     const newProject = function (name, description, selectedDate) {
@@ -188,6 +304,57 @@ const projectManager = (function () {
 
         projectList.push(add);
     }
+
+    const getProjectList = function () {
+        return projectList;
+    }
+
+    const getProject = function (x) {
+        return projectList[x];
+    }
+
+    const getProjectByName = function (name) {
+        return getProject(projectLookup(name));
+    }
+
+    const sortAlphaUp = function () {
+        projectList.sort(function (a, b) {
+            if (a.name > b.name) {
+                return +1;
+            } else if (a.name < b.name) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+    }
+
+    const sortAlphaDown = function () {
+        projectList.sort(function (a, b) {
+            if (a.name > b.name) {
+                return -1;
+            } else if (a.name < b.name) {
+                return +1;
+            } else {
+                return 0;
+            }
+        })
+    }
+
+    const sortAscDueDate = function () {
+        projectList.sort(function (a, b) {
+            return Date.parse(a.dueDate) - Date.parse(b.dueDate);
+        })
+    }
+
+    const sortDescDueDate = function () {
+        projectList.sort(function (a, b) {
+            return Date.parse(b.dueDate) - Date.parse(a.dueDate);
+        })
+        console.log('?');
+    }
+
+    
 
     const projectLookup = function (name) {
 
@@ -233,15 +400,57 @@ const projectManager = (function () {
         taskManager.assignProjectToTask(projectName, taskName);
     }
 
+    const rmTaskFromProject = function (taskName, projectName) {
+        let rmIndex = projectLookup(projectName);
+
+        if(rmIndex === -1) {
+            console.log(`${projectName} doesn't exist.`);
+        }
+
+        if(!projectList[rmIndex].tasks.filter((item) => item === taskName)) {
+            return -1;
+        } else {
+            for(let i = 0; i < projectList[rmIndex].tasks.length; i++) {
+                if(projectList[rmIndex].tasks[i] !== taskName) {
+                    continue;
+                }
+
+                projectList[rmIndex].tasks.splice(i, 1);
+                break;
+            }
+        }
+    }
+
+    const clearTaskFromAll = function(taskName) {
+        projectList.forEach((project) => {
+            rmTaskFromProject(taskName, project.name);
+        })
+    }
+
     return {
+        removeProject,
+        newProject,
         getProjectList,
         getProject,
-        newProject,
+        getProjectByName,
+        sortAlphaUp,
+        sortAlphaDown,
+        sortAscDueDate,
+        sortDescDueDate,
         projectLookup,
         assignTaskToProject,
+        rmTaskFromProject,
+        clearTaskFromAll,
     };
 })();
 
-taskManager.newTask('this', 'that', '12-21-2023');
-taskManager.taskLookup('this');
-taskManager.getTimeLeft(taskManager.taskLookup('this'));
+return{
+    items,
+    task,
+    project,
+    taskManager,
+    projectManager,
+}
+
+
+})();

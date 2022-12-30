@@ -350,7 +350,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_noSourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "html {\n    box-sizing: border-box;\n}\n\n*,\n*::before,\n*::after {\n  box-sizing: inherit;\n  margin: 0;\n  padding: 0;\n  border: 0;\n  list-style: none;\n  text-decoration: none;\n}\n\nbody {\n  \n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "html {\n    box-sizing: border-box;\n}\n\n*,\n*::before,\n*::after {\n  box-sizing: inherit;\n  margin: 0;\n  padding: 0;\n  border: 0;\n  list-style: none;\n  text-decoration: none;\n  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;\n  font-size: 20px;\n}\n\nbody {\n  min-width: 100vw;\n  min-height: 100vh;\n  background-color: #d5f4e6;\n}\n\n.main {\n  min-width: 100vw;\n  min-height: 100vh;\n  display: flex;\n  align-items: stretch;\n}\n\n.sidebar {\n  width: 300px;\n  min-height: 100vh;\n  background-color: #80ced6;\n}\n\n.sidebar>h1 {\n  font-size: 2rem;\n  margin: 10px;\n  margin-bottom: 50px;\n}\n\nli {\n  padding: 15px 10px;\n}\n\nli:hover {\n  background-color: #58949b;\n}\n\nli>a {\n  color: black;\n}\n\n.projects {\n  display: flex;\n  flex: auto;\n  flex-direction: column;\n  align-items: stretch;\n}\n\n.projects-header {\n  background-color: #618685;\n  height: 100px;\n  display: flex;\n  align-items: center;\n}\n\n.new-project {\n  padding: 1rem;\n  background-color: #d5f4e6;\n  border-radius: 0.4rem;\n  margin: 0 20px 0 auto;\n}\n\n.projects-container {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr 1fr;\n  gap: 25px;\n  padding: 25px;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -877,9 +877,9 @@ const taskManager = (function () {
     }
 
     const removeTask = function (x) {
-        taskList.splice(x, 1);
-
         projectManager.clearTaskFromAll(taskList[x].name);
+
+        taskList.splice(x, 1);
     }
 
     const removeCompleted = function () {
@@ -1026,9 +1026,9 @@ const projectManager = (function () {
     let projectList = [];
 
     const removeProject = function (x) {
-        projectList.splice(x, 1);
-
         taskManager.clearProjectFromAll(projectList[x].name);
+
+        projectList.splice(x, 1);
     }
 
     const newProject = function (name, description, selectedDate) {

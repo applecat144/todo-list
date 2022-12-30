@@ -11,8 +11,72 @@ html {
   border: 0;
   list-style: none;
   text-decoration: none;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: 20px;
 }
 
 body {
-  
+  min-width: 100vw;
+  min-height: 100vh;
+  background-color: #d5f4e6;
 }
+
+.main {
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+}
+
+.sidebar {
+  width: 300px;
+  min-height: 100vh;
+  background-color: #80ced6;
+}
+
+.sidebar>h1 {
+  font-size: 2rem;
+  margin: 10px;
+  margin-bottom: 50px;
+}
+
+li {
+  padding: 15px 10px;
+}
+
+li:hover {
+  background-color: #58949b;
+}
+
+li>a {
+  color: black;
+}
+
+.projects {
+  display: flex;
+  flex: auto;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.projects-header {
+  background-color: #618685;
+  height: 100px;
+  display: flex;
+  align-items: center;
+}
+
+.new-project {
+  padding: 1rem;
+  background-color: #d5f4e6;
+  border-radius: 0.4rem;
+  margin: 0 20px 0 auto;
+}
+
+.projects-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 25px;
+  padding: 25px;
+}
+

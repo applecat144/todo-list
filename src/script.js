@@ -141,9 +141,9 @@ const taskManager = (function () {
     }
 
     const removeTask = function (x) {
-        taskList.splice(x, 1);
-
         projectManager.clearTaskFromAll(taskList[x].name);
+
+        taskList.splice(x, 1);
     }
 
     const removeCompleted = function () {
@@ -290,9 +290,9 @@ const projectManager = (function () {
     let projectList = [];
 
     const removeProject = function (x) {
-        projectList.splice(x, 1);
-
         taskManager.clearProjectFromAll(projectList[x].name);
+
+        projectList.splice(x, 1);
     }
 
     const newProject = function (name, description, selectedDate) {

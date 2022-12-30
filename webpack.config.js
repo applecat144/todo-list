@@ -10,7 +10,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: 'Untitled for now',
+            title: 'ToDoDa, do your thing !',
             template: './src/index.html',
         }),
     ],
